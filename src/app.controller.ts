@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Logger, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+
 import { AppService } from './app.service';
 
 @Controller()
@@ -12,12 +13,16 @@ export class AppController {
 
   @Post()
   webhook(@Body() body: any): any {
-    Logger.log(body);
-    return {
-      followupEventInput: {
-        name: 'hello-world',
-        languageCode: 'en-US',
-      },
-    };
+    return this.appService
+      .getLocalWeather(body?.queryResult?.parameters?.city)
+      .then((response: any) => ({
+        followupEventInput: {
+          languageCode: 'en-US',
+          name: 'display-local-weather',
+          parameters: {
+            temperature: response?.main?.temp,
+          },
+        },
+      }));
   }
 }
